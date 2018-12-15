@@ -84,7 +84,11 @@ class WebSocket(_WebSocket):
         def closeit():
             yield from self.proto.writer.drain()
             self.proto.writer.close()
-        asyncio.async(closeit())
+        if sys.version_info[0:3] < (3,4,4):
+            _f_async = eval('asyncio.async')
+        else:
+            _f_async = eval('asyncio.ensure_future')
+        _f_async(closeit())
 
     def _write(self, data):
         """
@@ -94,7 +98,11 @@ class WebSocket(_WebSocket):
         def sendit(data):
             self.proto.writer.write(data)
             yield from self.proto.writer.drain()
-        asyncio.async(sendit(data))
+        if sys.version_info[0:3] < (3,4,4):
+            _f_async = eval('asyncio.async')
+        else:
+            _f_async = eval('asyncio.ensure_future')
+        _f_async(sendit(data))
 
     @asyncio.coroutine
     def run(self):
